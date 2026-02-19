@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { ParticipantCard } from "@/components/ParticipantCard";
@@ -26,6 +26,8 @@ interface Participant {
   description: string | null;
 }
 
+const TYPEWRITER_TEXT = "Rialo Builder's Hub";
+
 export default function Index() {
   const { isAdmin } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -34,6 +36,22 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [participantsLoading, setParticipantsLoading] = useState(false);
+  const [typedText, setTypedText] = useState("");
+  const typewriterRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let i = 0;
+    setTypedText("");
+    const type = () => {
+      if (i < TYPEWRITER_TEXT.length) {
+        setTypedText(TYPEWRITER_TEXT.slice(0, i + 1));
+        i++;
+        typewriterRef.current = setTimeout(type, 80);
+      }
+    };
+    typewriterRef.current = setTimeout(type, 400);
+    return () => { if (typewriterRef.current) clearTimeout(typewriterRef.current); };
+  }, []);
 
   useEffect(() => {
     fetchSessions();
@@ -134,8 +152,10 @@ export default function Index() {
           </div>
 
           <h1 className="font-display font-bold text-4xl md:text-6xl text-foreground leading-tight mb-4">
-            Rialo{" "}
-            <span className="gradient-text-primary">Builder's Hub</span>
+            <span className="gradient-text-primary">
+              {typedText}
+              <span className={`animate-pulse transition-opacity duration-300 ${typedText.length === TYPEWRITER_TEXT.length ? "opacity-0" : "opacity-100"}`}>|</span>
+            </span>
             <br />
             Weekly Participants
           </h1>
