@@ -23,6 +23,7 @@ interface Participant {
   discord_handle: string;
   twitter_handle: string | null;
   project_link: string | null;
+  project_title: string | null;
   description: string | null;
 }
 
