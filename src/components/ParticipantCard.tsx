@@ -1,4 +1,5 @@
-import { ExternalLink, Twitter } from "lucide-react";
+import { useState } from "react";
+import { ExternalLink, Twitter, Copy, Check } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -15,6 +16,13 @@ interface ParticipantCardProps {
 }
 
 export function ParticipantCard({ participant }: ParticipantCardProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(participant.discord_handle);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const initials = participant.display_name
     .split(" ")
     .map((n) => n[0])
@@ -44,6 +52,13 @@ export function ParticipantCard({ participant }: ParticipantCardProps) {
           <div className="flex items-center gap-1 text-muted-foreground text-xs mt-0.5">
             <span className="font-medium text-muted-foreground/70">dc:</span>
             <span>{participant.discord_handle}</span>
+            <button
+              onClick={handleCopy}
+              className="ml-1 p-0.5 rounded hover:text-primary transition-colors"
+              title="Copy Discord handle"
+            >
+              {copied ? <Check size={11} className="text-primary" /> : <Copy size={11} />}
+            </button>
           </div>
         </div>
       </div>
