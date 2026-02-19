@@ -125,15 +125,11 @@ export default function Index() {
   const PAGE_SIZE = 9;
 
   const currentSession = sessions[currentSessionIndex];
-  const hasFeatured = !search && participants.some((p) => p.is_featured);
-  const filteredParticipants = participants.filter((p) => {
-    if (hasFeatured && p.is_featured) return false; // already shown in spotlight
-    return (
-      p.display_name.toLowerCase().includes(search.toLowerCase()) ||
-      p.discord_handle.toLowerCase().includes(search.toLowerCase()) ||
-      (p.description || "").toLowerCase().includes(search.toLowerCase())
-    );
-  });
+  const filteredParticipants = participants.filter((p) =>
+    p.display_name.toLowerCase().includes(search.toLowerCase()) ||
+    p.discord_handle.toLowerCase().includes(search.toLowerCase()) ||
+    (p.description || "").toLowerCase().includes(search.toLowerCase())
+  );
 
   const totalPages = Math.ceil(filteredParticipants.length / PAGE_SIZE);
   const pagedParticipants = filteredParticipants.slice(
@@ -291,7 +287,7 @@ export default function Index() {
             })()}
 
             {/* Divider between featured and participants */}
-            {!participantsLoading && hasFeatured && (
+            {!participantsLoading && !search && participants.some((p) => p.is_featured) && (
               <div className="flex items-center gap-3 mb-8">
                 <div className="flex-1 h-px bg-border" />
                 <span className="text-xs text-muted-foreground font-medium px-2">All Builders This Week</span>
