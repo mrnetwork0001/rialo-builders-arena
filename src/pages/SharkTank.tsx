@@ -13,9 +13,9 @@ export default function SharkTank() {
       {/* Navigation */}
       <header className="border-b border-border bg-card/30 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-28 flex items-center justify-between">
-          <div className="flex items-center">
-            <img src={rialoLogo} alt="Rialo Builders Arena" className="h-24 w-auto" />
-          </div>
+          <Link to="/">
+            <img src={rialoLogo} alt="Rialo Builders Arena" className="h-24 w-auto cursor-pointer" />
+          </Link>
           <nav className="flex items-center gap-1">
             <Link to="/">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
