@@ -39,6 +39,7 @@ export default function Index() {
   const [currentSessionIndex, setCurrentSessionIndex] = useState(0);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [search, setSearch] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [participantsLoading, setParticipantsLoading] = useState(false);
   const [typedText, setTypedText] = useState("");
@@ -106,6 +107,7 @@ export default function Index() {
     const nextIdx = currentSessionIndex + 1;
     if (nextIdx < sessions.length) {
       setCurrentSessionIndex(nextIdx);
+      setCurrentPage(1);
       fetchParticipants(sessions[nextIdx].id);
     }
   };
@@ -114,15 +116,25 @@ export default function Index() {
     const nextIdx = currentSessionIndex - 1;
     if (nextIdx >= 0) {
       setCurrentSessionIndex(nextIdx);
+      setCurrentPage(1);
       fetchParticipants(sessions[nextIdx].id);
     }
   };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 9;
 
   const currentSession = sessions[currentSessionIndex];
   const filteredParticipants = participants.filter((p) =>
     p.display_name.toLowerCase().includes(search.toLowerCase()) ||
     p.discord_handle.toLowerCase().includes(search.toLowerCase()) ||
     (p.description || "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredParticipants.length / PAGE_SIZE);
+  const pagedParticipants = filteredParticipants.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
   );
 
   return (
@@ -253,7 +265,7 @@ export default function Index() {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                 placeholder="Search builders by name, handle, or project…"
                 className="pl-9 bg-input border-border focus:border-primary max-w-md"
               />
@@ -297,16 +309,51 @@ export default function Index() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
-                {filteredParticipants.map((participant) => (
+                {pagedParticipants.map((participant) => (
                   <ParticipantCard key={participant.id} participant={participant} />
                 ))}
               </div>
             )}
 
+            {/* Pagination */}
+            {!participantsLoading && totalPages > 1 && (
+              <div className="flex items-center justify-center gap-1 mt-8">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={15} />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg border text-xs font-medium transition-colors ${
+                      page === currentPage
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+            )}
+
             {/* Count */}
             {!participantsLoading && filteredParticipants.length > 0 && (
-              <p className="text-center text-muted-foreground text-xs mt-8">
-                Showing {filteredParticipants.length} builder{filteredParticipants.length !== 1 ? "s" : ""}
+              <p className="text-center text-muted-foreground text-xs mt-4">
+                Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredParticipants.length)} of {filteredParticipants.length} builder{filteredParticipants.length !== 1 ? "s" : ""}
                 {search && ` matching "${search}"`}
               </p>
             )}
