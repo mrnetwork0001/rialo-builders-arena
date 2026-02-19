@@ -28,6 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let initialized = false;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
@@ -38,19 +40,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsAdmin(false);
         }
         setLoading(false);
+        initialized = true;
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdmin(session.user.id);
-      }
-      setLoading(false);
-    });
+    // Fallback: if onAuthStateChange doesn't fire within 3s, stop loading
+    const timeout = setTimeout(() => {
+      if (!initialized) setLoading(false);
+    }, 3000);
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
