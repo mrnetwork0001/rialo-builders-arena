@@ -21,6 +21,10 @@ export function LiveReactionFeed() {
       if (q.length === 0) return;
       const next = q.shift()!;
       setVisible((prev) => [next, ...prev].slice(0, 5));
+      // Auto-remove after 3 seconds
+      setTimeout(() => {
+        setVisible((prev) => prev.filter((item) => item.id !== next.id));
+      }, 3000);
     }, 1800);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
