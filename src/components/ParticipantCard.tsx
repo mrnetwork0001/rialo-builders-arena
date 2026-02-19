@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ExternalLink, Twitter, Copy, Check } from "lucide-react";
+import { ExternalLink, Twitter, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -18,6 +18,9 @@ interface ParticipantCardProps {
 
 export function ParticipantCard({ participant }: ParticipantCardProps) {
   const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const CHAR_LIMIT = 180;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(participant.discord_handle);
@@ -73,9 +76,25 @@ export function ParticipantCard({ participant }: ParticipantCardProps) {
 
       {/* Description */}
       {participant.description && (
-        <p className="text-muted-foreground text-sm leading-relaxed flex-1 line-clamp-4">
-          {participant.description}
-        </p>
+        <div className="flex-1">
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {expanded || participant.description.length <= CHAR_LIMIT
+              ? participant.description
+              : participant.description.slice(0, CHAR_LIMIT).trimEnd() + "…"}
+          </p>
+          {participant.description.length > CHAR_LIMIT && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center gap-1 text-xs text-primary hover:opacity-80 transition-opacity mt-1 font-medium"
+            >
+              {expanded ? (
+                <><ChevronUp size={12} /> Read less</>
+              ) : (
+                <><ChevronDown size={12} /> Read more</>
+              )}
+            </button>
+          )}
+        </div>
       )}
 
       {/* Links */}

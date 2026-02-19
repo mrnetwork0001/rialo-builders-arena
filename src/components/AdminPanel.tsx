@@ -522,12 +522,11 @@ export function AdminPanel() {
                   ))}
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Description (max 300 chars)</Label>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Description</Label>
                   <Textarea
                     value={newParticipant.description}
                     onChange={(e) => setNewParticipant({ ...newParticipant, description: e.target.value })}
-                    placeholder="Short description of the project..."
-                    maxLength={300}
+                    placeholder="Description of the project..."
                     rows={3}
                     className="bg-input border-border resize-none"
                   />
@@ -600,8 +599,7 @@ export function AdminPanel() {
                         <Textarea
                           value={editForm.description}
                           onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                          maxLength={300}
-                          rows={2}
+                          rows={3}
                           className="bg-input border-border resize-none text-sm"
                         />
                       </div>
