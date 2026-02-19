@@ -122,7 +122,7 @@ export default function Index() {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 9;
+  const PAGE_SIZE = 6;
 
   const currentSession = sessions[currentSessionIndex];
   const filteredParticipants = participants.filter((p) =>
