@@ -3,6 +3,8 @@ import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { ParticipantCard } from "@/components/ParticipantCard";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LiveReactionFeed } from "@/components/LiveReactionFeed";
 import { ChevronLeft, ChevronRight, Search, Users, CalendarDays, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -123,6 +125,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <LiveReactionFeed />
       {/* Navigation */}
       <header className="border-b border-border bg-card/30 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-28 flex items-center justify-between">
@@ -138,6 +141,11 @@ export default function Index() {
                 Shark Tank
               </Button>
             </Link>
+            <Link to="/apply">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+                Apply
+              </Button>
+            </Link>
             {isAdmin && (
               <Link to="/admin">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2 text-xs">
@@ -146,6 +154,7 @@ export default function Index() {
                 </Button>
               </Link>
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </header>

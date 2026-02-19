@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      builder_followers: {
+        Row: {
+          created_at: string
+          discord_handle: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          discord_handle: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          discord_handle?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       participants: {
         Row: {
           avatar_url: string | null
@@ -88,6 +109,51 @@ export type Database = {
           id?: string
           participant_id?: string
           visitor_key?: string
+        }
+        Relationships: []
+      }
+      session_applications: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          discord_handle: string
+          display_name: string
+          email: string
+          id: string
+          project_description: string | null
+          project_link: string | null
+          project_title: string | null
+          status: string
+          twitter_handle: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          discord_handle: string
+          display_name: string
+          email: string
+          id?: string
+          project_description?: string | null
+          project_link?: string | null
+          project_title?: string | null
+          status?: string
+          twitter_handle?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          discord_handle?: string
+          display_name?: string
+          email?: string
+          id?: string
+          project_description?: string | null
+          project_link?: string | null
+          project_title?: string | null
+          status?: string
+          twitter_handle?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

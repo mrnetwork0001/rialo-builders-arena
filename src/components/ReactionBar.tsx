@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import confetti from "canvas-confetti";
 
 const EMOJIS = ["👏", "🔥", "💡"] as const;
 type Emoji = (typeof EMOJIS)[number];
@@ -28,6 +29,7 @@ export function ReactionBar({ participantId }: Props) {
   const [myReactions, setMyReactions] = useState<Set<Emoji>>(new Set());
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<Emoji | null>(null);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const fetchReactions = useCallback(async () => {
     const visitorKey = getVisitorKey();
@@ -61,6 +63,27 @@ export function ReactionBar({ participantId }: Props) {
     const visitorKey = getVisitorKey();
     const alreadyReacted = myReactions.has(emoji);
     const prevReaction = EMOJIS.find((e) => myReactions.has(e) && e !== emoji) ?? null;
+
+    // Confetti on new reaction
+    if (!alreadyReacted) {
+      const btn = buttonRefs.current[emoji];
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        confetti({
+          particleCount: 40,
+          spread: 60,
+          startVelocity: 20,
+          ticks: 60,
+          gravity: 1.2,
+          origin: {
+            x: (rect.left + rect.width / 2) / window.innerWidth,
+            y: (rect.top + rect.height / 2) / window.innerHeight,
+          },
+          colors: ["#00e5b4", "#a855f7", "#f59e0b", "#ec4899", "#3b82f6"],
+          scalar: 0.8,
+        });
+      }
+    }
 
     // Optimistic update
     setCounts((prev) => {
@@ -123,6 +146,7 @@ export function ReactionBar({ participantId }: Props) {
         return (
           <button
             key={emoji}
+            ref={(el) => { buttonRefs.current[emoji] = el; }}
             onClick={() => toggle(emoji)}
             disabled={toggling === emoji}
             className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg transition-all font-medium select-none

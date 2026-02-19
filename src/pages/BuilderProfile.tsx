@@ -6,6 +6,8 @@ import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
 import { Button } from "@/components/ui/button";
 import { Settings, ExternalLink, Twitter, ArrowLeft, CalendarDays, Copy, Check } from "lucide-react";
 import { ReactionBar } from "@/components/ReactionBar";
+import { FollowBuilder } from "@/components/FollowBuilder";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface ParticipantWithSession {
   id: string;
@@ -95,6 +97,11 @@ export default function BuilderProfile() {
                 Shark Tank
               </Button>
             </Link>
+            <Link to="/apply">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+                Apply
+              </Button>
+            </Link>
             {isAdmin && (
               <Link to="/admin">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2 text-xs">
@@ -103,6 +110,7 @@ export default function BuilderProfile() {
                 </Button>
               </Link>
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -175,10 +183,11 @@ export default function BuilderProfile() {
                     </a>
                   )}
                 </div>
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-3">
                   <span className="text-xs px-2.5 py-1 rounded-full bg-primary/15 text-primary font-medium border border-primary/20">
                     {entries.length} session{entries.length !== 1 ? "s" : ""} participated
                   </span>
+                  <FollowBuilder discordHandle={profile.discord_handle} />
                 </div>
               </div>
             </div>
