@@ -302,7 +302,7 @@ export function AdminPanel() {
     e.preventDefault();
     if (!selectedSession) return;
     setAddingParticipant(true);
-    const { error } = await supabase.from("participants").insert({
+    const { data: inserted, error } = await supabase.from("participants").insert({
       session_id: selectedSession.id,
       display_name: newParticipant.display_name,
       discord_handle: newParticipant.discord_handle,
@@ -311,11 +311,15 @@ export function AdminPanel() {
       project_title: newParticipant.project_title || null,
       description: newParticipant.description || null,
       avatar_url: newParticipant.avatar_url || null,
-    });
-    if (!error) {
+    }).select("id").single();
+    if (!error && inserted) {
       setNewParticipant(emptyParticipant);
       setShowAddParticipant(false);
       fetchParticipants(selectedSession.id);
+      // Notify followers asynchronously (fire-and-forget)
+      supabase.functions.invoke("notify-followers", {
+        body: { participant_id: inserted.id },
+      }).catch((err) => console.warn("notify-followers failed:", err));
     }
     setAddingParticipant(false);
   };
