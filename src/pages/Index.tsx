@@ -241,7 +241,14 @@ export default function Index() {
       <footer className="border-t border-border py-6 px-4 text-center">
         <p className="text-muted-foreground text-sm">
           Built by{" "}
-          <span className="text-primary font-medium">MrNetwork</span>
+          <a
+            href="https://x.com/encrypt_wizard"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary font-medium hover:underline"
+          >
+            MrNetwork
+          </a>
         </p>
       </footer>
     </div>
