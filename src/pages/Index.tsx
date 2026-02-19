@@ -98,14 +98,24 @@ export default function Index() {
           <div className="flex items-center">
             <img src={rialoLogo} alt="Rialo Builders Arena" className="h-24 w-auto" />
           </div>
-          {isAdmin && (
-            <Link to="/admin">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2 text-xs">
-                <Settings size={14} />
-                Admin
+          <nav className="flex items-center gap-1">
+            <Button variant="default" size="sm" className="text-sm font-medium">
+              Builder's Hub
+            </Button>
+            <Link to="/shark-tank">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+                Shark Tank
               </Button>
             </Link>
-          )}
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2 text-xs">
+                  <Settings size={14} />
+                  Admin
+                </Button>
+              </Link>
+            )}
+          </nav>
         </div>
       </header>
 
