@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ExternalLink, Twitter, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { ReactionBar } from "@/components/ReactionBar";
 
 interface Participant {
   id: string;
@@ -50,9 +52,12 @@ export function ParticipantCard({ participant }: ParticipantCardProps) {
           </div>
         )}
         <div>
-          <h3 className="font-display font-semibold text-foreground text-base leading-tight">
+          <Link
+            to={`/builders/${encodeURIComponent(participant.discord_handle)}`}
+            className="font-display font-semibold text-foreground text-base leading-tight hover:text-primary transition-colors"
+          >
             {participant.display_name}
-          </h3>
+          </Link>
           <div className="flex items-center gap-1 text-muted-foreground text-xs mt-0.5">
             <span className="font-medium text-muted-foreground/70">dc:</span>
             <span>{participant.discord_handle}</span>
@@ -122,6 +127,9 @@ export function ParticipantCard({ participant }: ParticipantCardProps) {
           </a>
         )}
       </div>
+
+      {/* Reactions */}
+      <ReactionBar participantId={participant.id} />
     </div>
   );
 }
