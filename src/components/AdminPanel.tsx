@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical } from "lucide-react";
 
 interface Session {
   id: string;
@@ -179,8 +179,49 @@ export function AdminPanel() {
       .from("participants")
       .select("*")
       .eq("session_id", sessionId)
+      .order("sort_order")
       .order("created_at");
     setParticipants(data || []);
+  };
+
+  // Drag state
+  const dragIndex = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    dragIndex.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = async (dropIndex: number) => {
+    const fromIndex = dragIndex.current;
+    if (fromIndex === null || fromIndex === dropIndex) {
+      setDragOverIndex(null);
+      dragIndex.current = null;
+      return;
+    }
+    const reordered = [...participants];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(dropIndex, 0, moved);
+    setParticipants(reordered);
+    setDragOverIndex(null);
+    dragIndex.current = null;
+
+    // Persist new order
+    await Promise.all(
+      reordered.map((p, i) =>
+        supabase.from("participants").update({ sort_order: i + 1 }).eq("id", p.id)
+      )
+    );
+  };
+
+  const handleDragEnd = () => {
+    setDragOverIndex(null);
+    dragIndex.current = null;
   };
 
   const handleSelectSession = (session: Session) => {
@@ -507,8 +548,20 @@ export function AdminPanel() {
 
             {/* Participants List */}
             <div className="space-y-3">
-              {participants.map((p) => (
-                <div key={p.id} className="gradient-card border border-border rounded-xl p-4">
+              {participants.map((p, index) => (
+                <div
+                  key={p.id}
+                  draggable={editingId !== p.id}
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={() => handleDrop(index)}
+                  onDragEnd={handleDragEnd}
+                  className={`gradient-card border rounded-xl p-4 transition-all ${
+                    dragOverIndex === index
+                      ? "border-primary/60 bg-primary/5 scale-[1.01]"
+                      : "border-border"
+                  }`}
+                >
                   {editingId === p.id ? (
                     <div className="space-y-4">
                       {/* Avatar upload in edit mode */}
@@ -562,6 +615,7 @@ export function AdminPanel() {
                   ) : (
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
+                        <GripVertical size={15} className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing shrink-0" />
                         {p.avatar_url ? (
                           <img
                             src={p.avatar_url}
@@ -575,7 +629,7 @@ export function AdminPanel() {
                         )}
                         <div className="min-w-0">
                           <p className="font-medium text-sm text-foreground">{p.display_name}</p>
-                          <p className="text-xs text-muted-foreground truncate">#{p.discord_handle}</p>
+                          <p className="text-xs text-muted-foreground truncate">dc: {p.discord_handle}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">

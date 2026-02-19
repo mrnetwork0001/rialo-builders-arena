@@ -24,6 +24,7 @@ export type Database = {
           id: string
           project_link: string | null
           session_id: string
+          sort_order: number | null
           twitter_handle: string | null
           updated_at: string
         }
@@ -36,6 +37,7 @@ export type Database = {
           id?: string
           project_link?: string | null
           session_id: string
+          sort_order?: number | null
           twitter_handle?: string | null
           updated_at?: string
         }
@@ -48,6 +50,7 @@ export type Database = {
           id?: string
           project_link?: string | null
           session_id?: string
+          sort_order?: number | null
           twitter_handle?: string | null
           updated_at?: string
         }

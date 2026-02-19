@@ -1,4 +1,4 @@
-import { ExternalLink, Twitter, Hash } from "lucide-react";
+import { ExternalLink, Twitter } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -42,7 +42,7 @@ export function ParticipantCard({ participant }: ParticipantCardProps) {
             {participant.display_name}
           </h3>
           <div className="flex items-center gap-1 text-muted-foreground text-xs mt-0.5">
-            <Hash size={11} />
+            <span className="font-medium text-muted-foreground/70">dc:</span>
             <span>{participant.discord_handle}</span>
           </div>
         </div>
