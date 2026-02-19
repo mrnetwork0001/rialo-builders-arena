@@ -67,6 +67,30 @@ export type Database = {
           },
         ]
       }
+      reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          participant_id: string
+          visitor_key: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          participant_id: string
+          visitor_key: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          participant_id?: string
+          visitor_key?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
