@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import SharkTank from "./pages/SharkTank";
 import BuilderProfile from "./pages/BuilderProfile";
+import ApplyPage from "./pages/ApplyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/shark-tank" element={<SharkTank />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/apply" element={<ApplyPage />} />
             <Route path="/builders/:discordHandle" element={<BuilderProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

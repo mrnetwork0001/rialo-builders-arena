@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical, ClipboardList, CheckCircle2, XCircle, Clock } from "lucide-react";
 
 interface Session {
   id: string;
@@ -140,18 +140,37 @@ function AvatarUpload({
 }
 
 // ── AdminPanel ───────────────────────────────────────────────────────────────
+interface Application {
+  id: string;
+  display_name: string;
+  discord_handle: string;
+  twitter_handle: string | null;
+  email: string;
+  project_title: string | null;
+  project_description: string | null;
+  project_link: string | null;
+  status: string;
+  admin_notes: string | null;
+  created_at: string;
+}
+
 export function AdminPanel() {
   const { signOut } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"sessions" | "participants">("sessions");
+  const [view, setView] = useState<"sessions" | "participants" | "applications">("sessions");
 
   // New session form
   const [newSessionLabel, setNewSessionLabel] = useState("");
   const [newSessionDate, setNewSessionDate] = useState("");
   const [addingSession, setAddingSession] = useState(false);
+
+  // Applications
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [updatingApp, setUpdatingApp] = useState<string | null>(null);
 
   // New participant form
   const [showAddParticipant, setShowAddParticipant] = useState(false);
@@ -165,6 +184,23 @@ export function AdminPanel() {
   useEffect(() => {
     fetchSessions();
   }, []);
+
+  const fetchApplications = async () => {
+    setApplicationsLoading(true);
+    const { data } = await (supabase as any)
+      .from("session_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setApplications(data || []);
+    setApplicationsLoading(false);
+  };
+
+  const handleUpdateApplicationStatus = async (id: string, status: string) => {
+    setUpdatingApp(id);
+    await (supabase as any).from("session_applications").update({ status }).eq("id", id);
+    setApplications((prev) => prev.map((a) => a.id === id ? { ...a, status } : a));
+    setUpdatingApp(null);
+  };
 
   const fetchSessions = async () => {
     setLoading(true);
@@ -348,18 +384,41 @@ export function AdminPanel() {
               </button>
             )}
             <span className="font-display font-semibold text-foreground">
-              {view === "sessions" ? "Admin Panel" : selectedSession?.week_label}
+              {view === "sessions" ? "Admin Panel" : view === "applications" ? "Applications" : selectedSession?.week_label}
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            className="text-muted-foreground hover:text-foreground gap-2"
-          >
-            <LogOut size={15} />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            {view !== "applications" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setView("applications"); fetchApplications(); }}
+                className="text-muted-foreground hover:text-primary gap-2 text-xs"
+              >
+                <ClipboardList size={14} />
+                Applications
+                {applications.filter((a) => a.status === "pending").length > 0 && (
+                  <span className="bg-primary text-primary-foreground rounded-full text-xs w-4 h-4 flex items-center justify-center font-bold">
+                    {applications.filter((a) => a.status === "pending").length}
+                  </span>
+                )}
+              </Button>
+            )}
+            {view === "applications" && (
+              <Button variant="ghost" size="sm" onClick={() => setView("sessions")} className="text-muted-foreground hover:text-foreground text-xs gap-1">
+                <ChevronLeft size={14} /> Sessions
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="text-muted-foreground hover:text-foreground gap-2"
+            >
+              <LogOut size={15} />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -662,6 +721,87 @@ export function AdminPanel() {
                 </p>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Applications View */}
+        {view === "applications" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="font-display font-semibold text-xl text-foreground mb-1">Builder Applications</h2>
+              <p className="text-muted-foreground text-sm">Review and approve applications from builders who want to join a session.</p>
+            </div>
+
+            {applicationsLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="animate-spin text-primary" size={28} />
+              </div>
+            ) : applications.length === 0 ? (
+              <p className="text-center text-muted-foreground py-12 text-sm">No applications yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {applications.map((app) => (
+                  <div key={app.id} className="gradient-card border border-border rounded-xl p-5 space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-foreground text-sm">{app.display_name}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium
+                            ${app.status === "pending" ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
+                            : app.status === "approved" ? "bg-primary/15 text-primary border border-primary/20"
+                            : "bg-destructive/15 text-destructive border border-destructive/20"}`}
+                          >
+                            {app.status === "pending" && <Clock size={10} className="inline mr-1" />}
+                            {app.status === "approved" && <CheckCircle2 size={10} className="inline mr-1" />}
+                            {app.status === "rejected" && <XCircle size={10} className="inline mr-1" />}
+                            {app.status}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+                          <span>dc: {app.discord_handle}</span>
+                          <span>{app.email}</span>
+                          {app.twitter_handle && <span>{app.twitter_handle}</span>}
+                        </div>
+                        {app.project_title && (
+                          <p className="text-xs text-foreground mt-1.5 font-medium">{app.project_title}</p>
+                        )}
+                        {app.project_description && (
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{app.project_description}</p>
+                        )}
+                        {app.project_link && (
+                          <a href={app.project_link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline mt-0.5 block truncate">{app.project_link}</a>
+                        )}
+                      </div>
+                      <div className="flex gap-1.5 shrink-0">
+                        {app.status !== "approved" && (
+                          <button
+                            onClick={() => handleUpdateApplicationStatus(app.id, "approved")}
+                            disabled={updatingApp === app.id}
+                            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 border border-primary/20 transition-colors font-medium"
+                          >
+                            {updatingApp === app.id ? <Loader2 size={11} className="animate-spin" /> : <CheckCircle2 size={11} />}
+                            Approve
+                          </button>
+                        )}
+                        {app.status !== "rejected" && (
+                          <button
+                            onClick={() => handleUpdateApplicationStatus(app.id, "rejected")}
+                            disabled={updatingApp === app.id}
+                            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 transition-colors font-medium"
+                          >
+                            {updatingApp === app.id ? <Loader2 size={11} className="animate-spin" /> : <XCircle size={11} />}
+                            Reject
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground/60">
+                      Submitted {new Date(app.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
