@@ -41,15 +41,27 @@ export default function Index() {
 
   useEffect(() => {
     let i = 0;
+    let deleting = false;
     setTypedText("");
-    const type = () => {
-      if (i < TYPEWRITER_TEXT.length) {
-        setTypedText(TYPEWRITER_TEXT.slice(0, i + 1));
+    const tick = () => {
+      if (!deleting) {
         i++;
-        typewriterRef.current = setTimeout(type, 80);
+        setTypedText(TYPEWRITER_TEXT.slice(0, i));
+        if (i === TYPEWRITER_TEXT.length) {
+          typewriterRef.current = setTimeout(() => { deleting = true; tick(); }, 1500);
+          return;
+        }
+      } else {
+        i--;
+        setTypedText(TYPEWRITER_TEXT.slice(0, i));
+        if (i === 0) {
+          typewriterRef.current = setTimeout(() => { deleting = false; tick(); }, 400);
+          return;
+        }
       }
+      typewriterRef.current = setTimeout(tick, deleting ? 45 : 80);
     };
-    typewriterRef.current = setTimeout(type, 400);
+    typewriterRef.current = setTimeout(tick, 400);
     return () => { if (typewriterRef.current) clearTimeout(typewriterRef.current); };
   }, []);
 
@@ -154,7 +166,7 @@ export default function Index() {
           <h1 className="font-display font-bold text-4xl md:text-6xl text-foreground leading-tight mb-4">
             <span className="gradient-text-primary">
               {typedText}
-              <span className={`animate-pulse transition-opacity duration-300 ${typedText.length === TYPEWRITER_TEXT.length ? "opacity-0" : "opacity-100"}`}>|</span>
+              <span className="animate-pulse">|</span>
             </span>
             <br />
             Weekly Participants
