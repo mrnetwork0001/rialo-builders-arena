@@ -48,10 +48,15 @@ export default function BuilderProfile() {
           is_current
         )
       `)
-      .eq("discord_handle", handle)
-      .order("created_at", { ascending: false });
+      .eq("discord_handle", handle);
 
-    setEntries((data as ParticipantWithSession[]) || []);
+    const sorted = ((data as ParticipantWithSession[]) || []).sort((a, b) => {
+      const dateA = a.session?.session_date ?? "";
+      const dateB = b.session?.session_date ?? "";
+      return dateB.localeCompare(dateA);
+    });
+
+    setEntries(sorted);
     setLoading(false);
   };
 
