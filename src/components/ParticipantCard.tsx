@@ -8,6 +8,7 @@ interface Participant {
   discord_handle: string;
   twitter_handle: string | null;
   project_link: string | null;
+  project_title: string | null;
   description: string | null;
 }
 
@@ -62,6 +63,13 @@ export function ParticipantCard({ participant }: ParticipantCardProps) {
           </div>
         </div>
       </div>
+
+      {/* Project Title */}
+      {participant.project_title && (
+        <p className="text-foreground/80 text-sm font-semibold leading-snug -mb-1">
+          {participant.project_title}
+        </p>
+      )}
 
       {/* Description */}
       {participant.description && (

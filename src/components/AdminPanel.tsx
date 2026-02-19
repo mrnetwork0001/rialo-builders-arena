@@ -22,6 +22,7 @@ interface Participant {
   discord_handle: string;
   twitter_handle: string | null;
   project_link: string | null;
+  project_title: string | null;
   description: string | null;
 }
 
@@ -30,6 +31,7 @@ const emptyParticipant = {
   discord_handle: "",
   twitter_handle: "",
   project_link: "",
+  project_title: "",
   description: "",
   avatar_url: "",
 };
@@ -270,6 +272,7 @@ export function AdminPanel() {
       discord_handle: newParticipant.discord_handle,
       twitter_handle: newParticipant.twitter_handle || null,
       project_link: newParticipant.project_link || null,
+      project_title: newParticipant.project_title || null,
       description: newParticipant.description || null,
       avatar_url: newParticipant.avatar_url || null,
     });
@@ -294,6 +297,7 @@ export function AdminPanel() {
       discord_handle: p.discord_handle,
       twitter_handle: p.twitter_handle || "",
       project_link: p.project_link || "",
+      project_title: p.project_title || "",
       description: p.description || "",
       avatar_url: p.avatar_url || "",
     });
@@ -308,6 +312,7 @@ export function AdminPanel() {
         discord_handle: editForm.discord_handle,
         twitter_handle: editForm.twitter_handle || null,
         project_link: editForm.project_link || null,
+        project_title: editForm.project_title || null,
         description: editForm.description || null,
         avatar_url: editForm.avatar_url || null,
       })
@@ -320,6 +325,7 @@ export function AdminPanel() {
     { key: "display_name", label: "Display Name *", placeholder: "John Doe" },
     { key: "discord_handle", label: "Discord Handle *", placeholder: "johndoe#1234" },
     { key: "twitter_handle", label: "Twitter/X Handle", placeholder: "@johndoe" },
+    { key: "project_title", label: "Project Title", placeholder: "My Awesome App" },
     { key: "project_link", label: "Project Link", placeholder: "https://myproject.com" },
   ];
 
