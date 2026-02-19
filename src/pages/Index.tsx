@@ -61,6 +61,7 @@ export default function Index() {
       .from("participants")
       .select("*")
       .eq("session_id", sessionId)
+      .order("sort_order")
       .order("created_at");
     setParticipants(data || []);
     setParticipantsLoading(false);
