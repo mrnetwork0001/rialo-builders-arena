@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import rialoLogo from "@/assets/rialo-logo.png";
+import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { ParticipantCard } from "@/components/ParticipantCard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -95,9 +95,8 @@ export default function Index() {
       {/* Navigation */}
       <header className="border-b border-border bg-card/30 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={rialoLogo} alt="Rialo" className="w-7 h-7 rounded-lg" />
-            <span className="font-display font-semibold text-foreground text-sm">Rialo Builder's Hub</span>
+          <div className="flex items-center">
+            <img src={rialoLogo} alt="Rialo Builders Arena" className="h-10 w-auto" />
           </div>
           {isAdmin && (
             <Link to="/admin">
