@@ -243,6 +243,8 @@ export function AdminPanel() {
       setNewSessionLabel("");
       setNewSessionDate("");
       fetchSessions();
+    } else {
+      alert(`Failed to add session: ${error.message}`);
     }
     setAddingSession(false);
   };
