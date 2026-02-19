@@ -33,10 +33,10 @@ export function LiveReactionFeed() {
   const namesRef = useRef<Record<string, string>>({});
   useEffect(() => {
     const loadNames = async () => {
-      const { data } = await (supabase as any).from("participants").select("id, display_name, project_title");
+      const { data } = await (supabase as any).from("participants").select("id, display_name");
       if (data) {
         const map: Record<string, string> = {};
-        for (const p of data) map[p.id] = p.project_title || p.display_name;
+        for (const p of data) map[p.id] = p.display_name;
         namesRef.current = map;
       }
     };
@@ -77,7 +77,7 @@ export function LiveReactionFeed() {
           style={{ opacity: Math.max(0.4, 1 - i * 0.18) }}
         >
           <span className="text-base">{item.emoji}</span>
-          <span>Someone reacted to <span className="text-foreground font-medium">{item.participant_name}</span></span>
+          <span>Somebody reacted to <span className="text-foreground font-medium">{item.participant_name}</span>'s Builder's Hub</span>
         </div>
       ))}
     </div>
