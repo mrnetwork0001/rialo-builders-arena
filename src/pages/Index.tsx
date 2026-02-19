@@ -187,7 +187,7 @@ export default function Index() {
             Weekly Builder Showcase
           </div>
 
-          <h1 className="font-display font-bold text-5xl md:text-7xl text-foreground leading-tight mb-4">
+          <h1 className="font-display font-bold text-4xl md:text-6xl text-foreground leading-tight mb-4">
             <span className="gradient-text-primary">
               {typedText}
               <span className="animate-pulse">|</span>
