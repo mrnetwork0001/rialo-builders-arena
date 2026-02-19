@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical, ClipboardList, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical, ClipboardList, CheckCircle2, XCircle, Clock, Star } from "lucide-react";
 
 interface Session {
   id: string;
@@ -24,6 +24,7 @@ interface Participant {
   project_link: string | null;
   project_title: string | null;
   description: string | null;
+  is_featured: boolean;
 }
 
 const emptyParticipant = {
@@ -327,6 +328,16 @@ export function AdminPanel() {
   const handleDeleteParticipant = async (id: string) => {
     if (!confirm("Delete this participant?")) return;
     await supabase.from("participants").delete().eq("id", id);
+    if (selectedSession) fetchParticipants(selectedSession.id);
+  };
+
+  const handleToggleFeatured = async (p: Participant) => {
+    const newVal = !p.is_featured;
+    // Unfeature all in this session first, then set the chosen one
+    if (newVal) {
+      await supabase.from("participants").update({ is_featured: false }).eq("session_id", p.session_id);
+    }
+    await supabase.from("participants").update({ is_featured: newVal }).eq("id", p.id);
     if (selectedSession) fetchParticipants(selectedSession.id);
   };
 
@@ -697,11 +708,23 @@ export function AdminPanel() {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="font-medium text-sm text-foreground">{p.display_name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-medium text-sm text-foreground">{p.display_name}</p>
+                            {p.is_featured && (
+                              <span className="text-xs text-primary font-medium bg-primary/10 px-1.5 py-0.5 rounded-full border border-primary/20">⭐ Featured</span>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground truncate">dc: {p.discord_handle}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          title={p.is_featured ? "Unfeature builder" : "Feature this builder"}
+                          onClick={() => handleToggleFeatured(p)}
+                          className={`transition-colors p-1.5 ${p.is_featured ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+                        >
+                          <Star size={14} className={p.is_featured ? "fill-primary" : ""} />
+                        </button>
                         <button
                           onClick={() => handleStartEdit(p)}
                           className="text-muted-foreground hover:text-primary transition-colors p-1.5"

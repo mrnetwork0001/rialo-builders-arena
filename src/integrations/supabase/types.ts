@@ -46,6 +46,7 @@ export type Database = {
           discord_handle: string
           display_name: string
           id: string
+          is_featured: boolean
           project_link: string | null
           project_title: string | null
           session_id: string
@@ -60,6 +61,7 @@ export type Database = {
           discord_handle: string
           display_name: string
           id?: string
+          is_featured?: boolean
           project_link?: string | null
           project_title?: string | null
           session_id: string
@@ -74,6 +76,7 @@ export type Database = {
           discord_handle?: string
           display_name?: string
           id?: string
+          is_featured?: boolean
           project_link?: string | null
           project_title?: string | null
           session_id?: string

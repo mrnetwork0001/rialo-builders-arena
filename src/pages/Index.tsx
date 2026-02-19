@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { ParticipantCard } from "@/components/ParticipantCard";
+import { FeaturedBuilder } from "@/components/FeaturedBuilder";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LiveReactionFeed } from "@/components/LiveReactionFeed";
-import { ChevronLeft, ChevronRight, Search, Users, CalendarDays, Settings } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Users, CalendarDays, Settings, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -27,6 +28,7 @@ interface Participant {
   project_link: string | null;
   project_title: string | null;
   description: string | null;
+  is_featured: boolean;
 }
 
 const TYPEWRITER_TEXT = "Rialo Builder's Hub";
@@ -256,6 +258,21 @@ export default function Index() {
                 className="pl-9 bg-input border-border focus:border-primary max-w-md"
               />
             </div>
+
+            {/* Featured Builder Spotlight */}
+            {!participantsLoading && !search && (() => {
+              const featured = participants.find((p) => p.is_featured);
+              if (!featured) return null;
+              return (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Star size={15} className="text-primary fill-primary" />
+                    <h3 className="text-sm font-semibold text-foreground">Featured Builder of the Week</h3>
+                  </div>
+                  <FeaturedBuilder participant={featured} />
+                </div>
+              );
+            })()}
 
             {/* Participants Grid */}
             {participantsLoading ? (
