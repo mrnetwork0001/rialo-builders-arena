@@ -18,20 +18,23 @@ export type Database = {
         Row: {
           created_at: string
           discord_handle: string
-          email: string
+          email: string | null
           id: string
+          visitor_key: string | null
         }
         Insert: {
           created_at?: string
           discord_handle: string
-          email: string
+          email?: string | null
           id?: string
+          visitor_key?: string | null
         }
         Update: {
           created_at?: string
           discord_handle?: string
-          email?: string
+          email?: string | null
           id?: string
+          visitor_key?: string | null
         }
         Relationships: []
       }
