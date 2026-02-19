@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera } from "lucide-react";
 
 interface Session {
   id: string;
@@ -34,6 +34,110 @@ const emptyParticipant = {
   avatar_url: "",
 };
 
+// ── Avatar Upload Component ──────────────────────────────────────────────────
+function AvatarUpload({
+  value,
+  onChange,
+  displayName,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  displayName?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5MB.");
+      return;
+    }
+    setError("");
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true });
+    if (uploadError) {
+      setError(uploadError.message);
+    } else {
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      onChange(data.publicUrl);
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div className="flex items-center gap-3">
+      {/* Preview */}
+      <div className="shrink-0">
+        {value ? (
+          <img
+            src={value}
+            alt="Avatar preview"
+            className="w-14 h-14 rounded-full object-cover border-2 border-primary/30"
+          />
+        ) : (
+          <div className="w-14 h-14 rounded-full bg-primary/10 border-2 border-dashed border-primary/30 flex items-center justify-center text-primary/50">
+            {displayName ? (
+              <span className="text-sm font-semibold text-primary/60">
+                {displayName.slice(0, 2).toUpperCase()}
+              </span>
+            ) : (
+              <Camera size={18} />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Upload button */}
+      <div className="flex-1 min-w-0">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg border border-border bg-input hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors w-full disabled:opacity-60"
+        >
+          {uploading ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Upload size={13} />
+          )}
+          {uploading ? "Uploading…" : value ? "Change photo" : "Upload photo"}
+        </button>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="text-xs text-muted-foreground hover:text-destructive mt-1 ml-1"
+          >
+            Remove
+          </button>
+        )}
+        {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+            e.target.value = "";
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── AdminPanel ───────────────────────────────────────────────────────────────
 export function AdminPanel() {
   const { signOut } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -154,17 +258,27 @@ export function AdminPanel() {
 
   const handleSaveEdit = async () => {
     if (!editingId) return;
-    await supabase.from("participants").update({
-      display_name: editForm.display_name,
-      discord_handle: editForm.discord_handle,
-      twitter_handle: editForm.twitter_handle || null,
-      project_link: editForm.project_link || null,
-      description: editForm.description || null,
-      avatar_url: editForm.avatar_url || null,
-    }).eq("id", editingId);
+    await supabase
+      .from("participants")
+      .update({
+        display_name: editForm.display_name,
+        discord_handle: editForm.discord_handle,
+        twitter_handle: editForm.twitter_handle || null,
+        project_link: editForm.project_link || null,
+        description: editForm.description || null,
+        avatar_url: editForm.avatar_url || null,
+      })
+      .eq("id", editingId);
     setEditingId(null);
     if (selectedSession) fetchParticipants(selectedSession.id);
   };
+
+  const textFields = [
+    { key: "display_name", label: "Display Name *", placeholder: "John Doe" },
+    { key: "discord_handle", label: "Discord Handle *", placeholder: "johndoe#1234" },
+    { key: "twitter_handle", label: "Twitter/X Handle", placeholder: "@johndoe" },
+    { key: "project_link", label: "Project Link", placeholder: "https://myproject.com" },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -174,7 +288,11 @@ export function AdminPanel() {
           <div className="flex items-center gap-3">
             {view === "participants" && (
               <button
-                onClick={() => { setView("sessions"); setSelectedSession(null); setShowAddParticipant(false); }}
+                onClick={() => {
+                  setView("sessions");
+                  setSelectedSession(null);
+                  setShowAddParticipant(false);
+                }}
                 className="text-muted-foreground hover:text-foreground transition-colors mr-1"
               >
                 <ChevronLeft size={20} />
@@ -259,10 +377,14 @@ export function AdminPanel() {
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-foreground text-sm truncate">{session.week_label}</span>
                           {session.is_current && (
-                            <span className="shrink-0 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">Current</span>
+                            <span className="shrink-0 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
+                              Current
+                            </span>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">{new Date(session.session_date).toLocaleDateString()}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(session.session_date).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -320,16 +442,24 @@ export function AdminPanel() {
 
             {/* Add Participant Form */}
             {showAddParticipant && (
-              <form onSubmit={handleAddParticipant} className="gradient-card border border-border rounded-xl p-5 space-y-4 animate-fade-in">
+              <form
+                onSubmit={handleAddParticipant}
+                className="gradient-card border border-border rounded-xl p-5 space-y-4 animate-fade-in"
+              >
                 <h3 className="font-display font-semibold text-foreground">New Participant</h3>
+
+                {/* Avatar upload */}
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-2 block">Profile Photo</Label>
+                  <AvatarUpload
+                    value={newParticipant.avatar_url}
+                    onChange={(url) => setNewParticipant({ ...newParticipant, avatar_url: url })}
+                    displayName={newParticipant.display_name}
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    { key: "display_name", label: "Display Name *", placeholder: "John Doe" },
-                    { key: "discord_handle", label: "Discord Handle *", placeholder: "johndoe#1234" },
-                    { key: "twitter_handle", label: "Twitter/X Handle", placeholder: "@johndoe" },
-                    { key: "project_link", label: "Project Link", placeholder: "https://myproject.com" },
-                    { key: "avatar_url", label: "Avatar URL", placeholder: "https://..." },
-                  ].map(({ key, label, placeholder }) => (
+                  {textFields.map(({ key, label, placeholder }) => (
                     <div key={key}>
                       <Label className="text-xs text-muted-foreground mb-1 block">{label}</Label>
                       <Input
@@ -380,15 +510,19 @@ export function AdminPanel() {
               {participants.map((p) => (
                 <div key={p.id} className="gradient-card border border-border rounded-xl p-4">
                   {editingId === p.id ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
+                      {/* Avatar upload in edit mode */}
+                      <div>
+                        <Label className="text-xs text-muted-foreground mb-2 block">Profile Photo</Label>
+                        <AvatarUpload
+                          value={editForm.avatar_url}
+                          onChange={(url) => setEditForm({ ...editForm, avatar_url: url })}
+                          displayName={editForm.display_name}
+                        />
+                      </div>
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {[
-                          { key: "display_name", label: "Display Name", placeholder: "John Doe" },
-                          { key: "discord_handle", label: "Discord Handle", placeholder: "johndoe#1234" },
-                          { key: "twitter_handle", label: "Twitter/X Handle", placeholder: "@johndoe" },
-                          { key: "project_link", label: "Project Link", placeholder: "https://..." },
-                          { key: "avatar_url", label: "Avatar URL", placeholder: "https://..." },
-                        ].map(({ key, label, placeholder }) => (
+                        {textFields.map(({ key, label, placeholder }) => (
                           <div key={key}>
                             <Label className="text-xs text-muted-foreground mb-1 block">{label}</Label>
                             <Input
@@ -411,10 +545,16 @@ export function AdminPanel() {
                         />
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={handleSaveEdit} className="flex items-center gap-1 text-xs text-primary hover:opacity-80">
+                        <button
+                          onClick={handleSaveEdit}
+                          className="flex items-center gap-1 text-xs text-primary hover:opacity-80"
+                        >
                           <Check size={13} /> Save
                         </button>
-                        <button onClick={() => setEditingId(null)} className="flex items-center gap-1 text-xs text-muted-foreground hover:opacity-80">
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="flex items-center gap-1 text-xs text-muted-foreground hover:opacity-80"
+                        >
                           <X size={13} /> Cancel
                         </button>
                       </div>
@@ -423,7 +563,11 @@ export function AdminPanel() {
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         {p.avatar_url ? (
-                          <img src={p.avatar_url} alt={p.display_name} className="w-9 h-9 rounded-full object-cover border border-border shrink-0" />
+                          <img
+                            src={p.avatar_url}
+                            alt={p.display_name}
+                            className="w-9 h-9 rounded-full object-cover border border-border shrink-0"
+                          />
                         ) : (
                           <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary text-xs font-semibold shrink-0">
                             {p.display_name.slice(0, 2).toUpperCase()}
@@ -435,10 +579,16 @@ export function AdminPanel() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => handleStartEdit(p)} className="text-muted-foreground hover:text-primary transition-colors p-1.5">
+                        <button
+                          onClick={() => handleStartEdit(p)}
+                          className="text-muted-foreground hover:text-primary transition-colors p-1.5"
+                        >
                           <Edit2 size={14} />
                         </button>
-                        <button onClick={() => handleDeleteParticipant(p.id)} className="text-muted-foreground hover:text-destructive transition-colors p-1.5">
+                        <button
+                          onClick={() => handleDeleteParticipant(p.id)}
+                          className="text-muted-foreground hover:text-destructive transition-colors p-1.5"
+                        >
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -447,7 +597,9 @@ export function AdminPanel() {
                 </div>
               ))}
               {participants.length === 0 && !showAddParticipant && (
-                <p className="text-muted-foreground text-center py-8 text-sm">No participants yet. Add the first one!</p>
+                <p className="text-muted-foreground text-center py-8 text-sm">
+                  No participants yet. Add the first one!
+                </p>
               )}
             </div>
           </div>
