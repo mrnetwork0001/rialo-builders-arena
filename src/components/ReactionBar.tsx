@@ -60,17 +60,33 @@ export function ReactionBar({ participantId }: Props) {
     setToggling(emoji);
     const visitorKey = getVisitorKey();
     const alreadyReacted = myReactions.has(emoji);
+    const prevReaction = EMOJIS.find((e) => myReactions.has(e) && e !== emoji) ?? null;
 
     // Optimistic update
-    setCounts((prev) => ({
-      ...prev,
-      [emoji]: Math.max(0, prev[emoji] + (alreadyReacted ? -1 : 1)),
-    }));
-    setMyReactions((prev) => {
-      const next = new Set(prev);
-      alreadyReacted ? next.delete(emoji) : next.add(emoji);
+    setCounts((prev) => {
+      const next = { ...prev };
+      if (alreadyReacted) {
+        next[emoji] = Math.max(0, next[emoji] - 1);
+      } else {
+        next[emoji] = next[emoji] + 1;
+        if (prevReaction) next[prevReaction] = Math.max(0, next[prevReaction] - 1);
+      }
       return next;
     });
+    setMyReactions(() => {
+      if (alreadyReacted) return new Set();
+      return new Set([emoji]);
+    });
+
+    // Remove previous reaction if switching
+    if (prevReaction) {
+      await (supabase as any)
+        .from("reactions")
+        .delete()
+        .eq("participant_id", participantId)
+        .eq("emoji", prevReaction)
+        .eq("visitor_key", visitorKey);
+    }
 
     if (alreadyReacted) {
       await (supabase as any)
@@ -98,9 +114,11 @@ export function ReactionBar({ participantId }: Props) {
     );
   }
 
+  const sortedEmojis = [...EMOJIS].sort((a, b) => counts[b] - counts[a]);
+
   return (
     <div className="flex gap-1.5 pt-2 border-t border-border">
-      {EMOJIS.map((emoji) => {
+      {sortedEmojis.map((emoji) => {
         const reacted = myReactions.has(emoji);
         return (
           <button
