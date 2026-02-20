@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
 import { Button } from "@/components/ui/button";
-import { Settings, ExternalLink, Twitter, ArrowLeft, CalendarDays, Copy, Check } from "lucide-react";
+import { Settings, ExternalLink, Twitter, ArrowLeft, CalendarDays, Copy, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { ReactionBar } from "@/components/ReactionBar";
 import { FollowBuilder } from "@/components/FollowBuilder";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -63,6 +63,14 @@ export default function BuilderProfile() {
   };
 
   const profile = entries[0];
+
+  const ENTRIES_PER_PAGE = 4;
+  const [timelinePage, setTimelinePage] = useState(1);
+  const totalPages = Math.ceil(entries.length / ENTRIES_PER_PAGE);
+  const paginatedEntries = entries.slice(
+    (timelinePage - 1) * ENTRIES_PER_PAGE,
+    timelinePage * ENTRIES_PER_PAGE
+  );
 
   const handleCopy = () => {
     if (!profile) return;
@@ -204,7 +212,7 @@ export default function BuilderProfile() {
                 <div className="absolute left-3.5 top-2 bottom-2 w-px bg-border" />
 
                 <div className="flex flex-col gap-6">
-                  {entries.map((entry) => (
+                  {paginatedEntries.map((entry) => (
                     <div key={entry.id} className="relative pl-10">
                       {/* Dot */}
                       <div className={`absolute left-0 top-5 w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs
@@ -283,6 +291,49 @@ export default function BuilderProfile() {
                   ))}
                 </div>
               </div>
+
+              {/* Pagination — only shown when entries exceed 4 */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTimelinePage((p) => Math.max(1, p - 1))}
+                    disabled={timelinePage === 1}
+                    className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                  >
+                    <ChevronLeft size={15} />
+                    Previous
+                  </Button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setTimelinePage(page)}
+                        className={`w-8 h-8 rounded-full text-sm font-medium transition-colors
+                          ${page === timelinePage
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTimelinePage((p) => Math.min(totalPages, p + 1))}
+                    disabled={timelinePage === totalPages}
+                    className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                  >
+                    Next
+                    <ChevronRight size={15} />
+                  </Button>
+                </div>
+              )}
             </div>
           </>
         )}
