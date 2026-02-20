@@ -28,18 +28,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Restore session immediately on mount to prevent sign-out on page reload
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkAdmin(session.user.id);
-      }
-      setLoading(false);
-    });
+    let initialLoadDone = false;
 
+    // onAuthStateChange fires first with INITIAL_SESSION — skip the RPC call there,
+    // let getSession() be the single source of truth for the initial load.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!initialLoadDone) return; // skip initial event, handled by getSession below
+
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -50,6 +46,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
       }
     );
+
+    // Single RPC call on mount to restore session and admin status
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await checkAdmin(session.user.id);
+      } else {
+        setIsAdmin(false);
+      }
+      setLoading(false);
+      initialLoadDone = true;
+    });
 
     return () => {
       subscription.unsubscribe();
