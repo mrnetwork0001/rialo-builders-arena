@@ -162,16 +162,16 @@ export default function Index() {
             <img src={rialoLogo} alt="Rialo Builders Arena" className="h-24 w-auto cursor-pointer" />
           </Link>
           <nav className="flex items-center gap-1">
-            <Button variant="default" size="sm" className="text-sm font-medium hover:text-[#df9c2a]">
+            <Button variant="default" size="sm" className="text-sm font-medium">
               Builder's Hub
             </Button>
             <Link to="/shark-tank">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-[#df9c2a] text-sm font-medium">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
                 Shark Tank
               </Button>
             </Link>
             <Link to="/apply">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-[#df9c2a] text-sm font-medium">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
                 Apply
               </Button>
             </Link>
