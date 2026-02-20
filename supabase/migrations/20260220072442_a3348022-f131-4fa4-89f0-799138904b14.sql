@@ -1,0 +1,1 @@
+ALTER TABLE public.session_applications ADD COLUMN avatar_url text;
