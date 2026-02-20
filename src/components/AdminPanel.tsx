@@ -203,6 +203,14 @@ export function AdminPanel() {
     setUpdatingApp(null);
   };
 
+  const handleDeleteApplication = async (id: string) => {
+    if (!confirm("Delete this application? This cannot be undone.")) return;
+    setUpdatingApp(id);
+    await (supabase as any).from("session_applications").delete().eq("id", id);
+    setApplications((prev) => prev.filter((a) => a.id !== id));
+    setUpdatingApp(null);
+  };
+
   const fetchSessions = async () => {
     setLoading(true);
     const { data } = await supabase
@@ -820,6 +828,15 @@ export function AdminPanel() {
                             Reject
                           </button>
                         )}
+                        <button
+                          onClick={() => handleDeleteApplication(app.id)}
+                          disabled={updatingApp === app.id}
+                          title="Delete application"
+                          className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/25 border border-destructive/20 transition-colors font-medium"
+                        >
+                          {updatingApp === app.id ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
+                          Delete
+                        </button>
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground/60">
