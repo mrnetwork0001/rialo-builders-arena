@@ -28,7 +28,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    let initialized = false;
+    // Restore session immediately on mount to prevent sign-out on page reload
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await checkAdmin(session.user.id);
+      }
+      setLoading(false);
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -40,18 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsAdmin(false);
         }
         setLoading(false);
-        initialized = true;
       }
     );
 
-    // Fallback: if onAuthStateChange doesn't fire within 3s, stop loading
-    const timeout = setTimeout(() => {
-      if (!initialized) setLoading(false);
-    }, 3000);
-
     return () => {
       subscription.unsubscribe();
-      clearTimeout(timeout);
     };
   }, []);
 
