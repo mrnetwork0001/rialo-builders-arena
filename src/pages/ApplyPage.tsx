@@ -79,15 +79,15 @@ export default function ApplyPage() {
           </Link>
           <nav className="flex items-center gap-1">
             <Link to="/">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">Builder's Hub</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover text-sm font-medium">Builder's Hub</Button>
             </Link>
             <Link to="/shark-tank">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">Shark Tank</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover text-sm font-medium">Shark Tank</Button>
             </Link>
             <Button variant="default" size="sm" className="text-sm font-medium">Apply</Button>
             {isAdmin && (
               <Link to="/admin">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2 text-xs">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover gap-2 text-xs">
                   <Settings size={14} /> Admin
                 </Button>
               </Link>

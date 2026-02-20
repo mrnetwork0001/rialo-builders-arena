@@ -166,18 +166,18 @@ export default function Index() {
               Builder's Hub
             </Button>
             <Link to="/shark-tank">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover text-sm font-medium">
                 Shark Tank
               </Button>
             </Link>
             <Link to="/apply">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover text-sm font-medium">
                 Apply
               </Button>
             </Link>
             {isAdmin && (
               <Link to="/admin">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2 text-xs">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover gap-2 text-xs">
                   <Settings size={14} />
                   Admin
                 </Button>
