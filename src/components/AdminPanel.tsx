@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical, ClipboardList, CheckCircle2, XCircle, Clock, Star } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical, ClipboardList, CheckCircle2, XCircle, Clock, Star, Search } from "lucide-react";
 
 interface Session {
   id: string;
@@ -173,6 +173,7 @@ export function AdminPanel() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [updatingApp, setUpdatingApp] = useState<string | null>(null);
+  const [appSearch, setAppSearch] = useState("");
 
   // Approve modal
   const [approveModal, setApproveModal] = useState<{ app: Application } | null>(null);
@@ -803,15 +804,39 @@ export function AdminPanel() {
               <p className="text-muted-foreground text-sm">Review and approve applications from builders who want to join a session.</p>
             </div>
 
+            {/* Search bar */}
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Input
+                value={appSearch}
+                onChange={(e) => setAppSearch(e.target.value)}
+                placeholder="Search by name, Discord, email, or project…"
+                className="pl-9 bg-input border-border"
+              />
+            </div>
+
             {applicationsLoading ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="animate-spin text-primary" size={28} />
               </div>
-            ) : applications.length === 0 ? (
-              <p className="text-center text-muted-foreground py-12 text-sm">No applications yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {applications.map((app) => (
+            ) : (() => {
+              const q = appSearch.toLowerCase();
+              const filtered = q
+                ? applications.filter(
+                    (a) =>
+                      a.display_name.toLowerCase().includes(q) ||
+                      a.discord_handle.toLowerCase().includes(q) ||
+                      a.email.toLowerCase().includes(q) ||
+                      (a.project_title ?? "").toLowerCase().includes(q)
+                  )
+                : applications;
+              return filtered.length === 0 ? (
+                <p className="text-center text-muted-foreground py-12 text-sm">
+                  {appSearch ? "No applications match your search." : "No applications yet."}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {filtered.map((app) => (
                   <div key={app.id} className="gradient-card border border-border rounded-xl p-5 space-y-3">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-3 min-w-0">
@@ -889,9 +914,10 @@ export function AdminPanel() {
                       Submitted {new Date(app.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
