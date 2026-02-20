@@ -41,6 +41,7 @@ export default function Index() {
   const [search, setSearch] = useState("");
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [participantsLoading, setParticipantsLoading] = useState(false);
   const [typedText, setTypedText] = useState("");
   const typewriterRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,19 +77,33 @@ export default function Index() {
   }, []);
 
   const fetchSessions = async () => {
-    const { data } = await supabase
-      .from("weekly_sessions")
-      .select("*")
-      .order("session_date", { ascending: false });
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 10000)
+      );
+      const query = supabase
+        .from("weekly_sessions")
+        .select("*")
+        .order("session_date", { ascending: false });
 
-    if (data && data.length > 0) {
-      setSessions(data);
-      const currentIdx = data.findIndex((s) => s.is_current);
-      const startIdx = currentIdx >= 0 ? currentIdx : 0;
-      setCurrentSessionIndex(startIdx);
-      fetchParticipants(data[startIdx].id);
+      const { data, error } = await Promise.race([query, timeout]) as Awaited<typeof query>;
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setSessions(data);
+        const currentIdx = data.findIndex((s) => s.is_current);
+        const startIdx = currentIdx >= 0 ? currentIdx : 0;
+        setCurrentSessionIndex(startIdx);
+        fetchParticipants(data[startIdx].id);
+      }
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const fetchParticipants = async (sessionId: string) => {
@@ -208,6 +223,11 @@ export default function Index() {
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <div className="w-10 h-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
             <p className="text-muted-foreground text-sm">Loading sessions…</p>
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <p className="text-muted-foreground text-sm">Failed to load sessions. Please check your connection.</p>
+            <Button size="sm" onClick={fetchSessions}>Try Again</Button>
           </div>
         ) : sessions.length === 0 ? (
           <div className="text-center py-24">
