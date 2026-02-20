@@ -150,6 +150,7 @@ interface Application {
   project_title: string | null;
   project_description: string | null;
   project_link: string | null;
+  avatar_url: string | null;
   status: string;
   admin_notes: string | null;
   created_at: string;
@@ -172,6 +173,11 @@ export function AdminPanel() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [updatingApp, setUpdatingApp] = useState<string | null>(null);
+
+  // Approve modal
+  const [approveModal, setApproveModal] = useState<{ app: Application } | null>(null);
+  const [approveSessionId, setApproveSessionId] = useState<string>("");
+  const [approving, setApproving] = useState(false);
 
   // New participant form
   const [showAddParticipant, setShowAddParticipant] = useState(false);
@@ -210,6 +216,35 @@ export function AdminPanel() {
     setApplications((prev) => prev.filter((a) => a.id !== id));
     setUpdatingApp(null);
   };
+
+  const handleApproveWithSession = async () => {
+    if (!approveModal || !approveSessionId) return;
+    setApproving(true);
+    const { app } = approveModal;
+
+    // Create participant from application data
+    await (supabase as any).from("participants").insert({
+      session_id: approveSessionId,
+      display_name: app.display_name,
+      discord_handle: app.discord_handle,
+      twitter_handle: app.twitter_handle || null,
+      project_title: app.project_title || null,
+      project_link: app.project_link || null,
+      description: app.project_description || null,
+      avatar_url: app.avatar_url || null,
+      is_featured: false,
+    });
+
+    // Mark application as approved
+    await (supabase as any).from("session_applications").update({ status: "approved" }).eq("id", app.id);
+    setApplications((prev) => prev.map((a) => a.id === app.id ? { ...a, status: "approved" } : a));
+
+    setApproving(false);
+    setApproveModal(null);
+    setApproveSessionId("");
+  };
+
+
 
   const fetchSessions = async () => {
     setLoading(true);
@@ -389,6 +424,7 @@ export function AdminPanel() {
   ];
 
   return (
+    <>
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -778,44 +814,54 @@ export function AdminPanel() {
                 {applications.map((app) => (
                   <div key={app.id} className="gradient-card border border-border rounded-xl p-5 space-y-3">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-foreground text-sm">{app.display_name}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium
-                            ${app.status === "pending" ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
-                            : app.status === "approved" ? "bg-primary/15 text-primary border border-primary/20"
-                            : "bg-destructive/15 text-destructive border border-destructive/20"}`}
-                          >
-                            {app.status === "pending" && <Clock size={10} className="inline mr-1" />}
-                            {app.status === "approved" && <CheckCircle2 size={10} className="inline mr-1" />}
-                            {app.status === "rejected" && <XCircle size={10} className="inline mr-1" />}
-                            {app.status}
-                          </span>
+                      <div className="flex items-start gap-3 min-w-0">
+                        {/* Avatar thumbnail */}
+                        {app.avatar_url ? (
+                          <img src={app.avatar_url} alt={app.display_name} className="w-10 h-10 rounded-full object-cover border border-border shrink-0 mt-0.5" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary text-xs font-semibold shrink-0 mt-0.5">
+                            {app.display_name.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-foreground text-sm">{app.display_name}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium
+                              ${app.status === "pending" ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
+                              : app.status === "approved" ? "bg-primary/15 text-primary border border-primary/20"
+                              : "bg-destructive/15 text-destructive border border-destructive/20"}`}
+                            >
+                              {app.status === "pending" && <Clock size={10} className="inline mr-1" />}
+                              {app.status === "approved" && <CheckCircle2 size={10} className="inline mr-1" />}
+                              {app.status === "rejected" && <XCircle size={10} className="inline mr-1" />}
+                              {app.status}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+                            <span>dc: {app.discord_handle}</span>
+                            <span>{app.email}</span>
+                            {app.twitter_handle && <span>{app.twitter_handle}</span>}
+                          </div>
+                          {app.project_title && (
+                            <p className="text-xs text-foreground mt-1.5 font-medium">{app.project_title}</p>
+                          )}
+                          {app.project_description && (
+                            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{app.project_description}</p>
+                          )}
+                          {app.project_link && (
+                            <a href={app.project_link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline mt-0.5 block truncate">{app.project_link}</a>
+                          )}
                         </div>
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
-                          <span>dc: {app.discord_handle}</span>
-                          <span>{app.email}</span>
-                          {app.twitter_handle && <span>{app.twitter_handle}</span>}
-                        </div>
-                        {app.project_title && (
-                          <p className="text-xs text-foreground mt-1.5 font-medium">{app.project_title}</p>
-                        )}
-                        {app.project_description && (
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{app.project_description}</p>
-                        )}
-                        {app.project_link && (
-                          <a href={app.project_link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline mt-0.5 block truncate">{app.project_link}</a>
-                        )}
                       </div>
-                      <div className="flex gap-1.5 shrink-0">
+                      <div className="flex gap-1.5 shrink-0 flex-col items-end">
                         {app.status !== "approved" && (
                           <button
-                            onClick={() => handleUpdateApplicationStatus(app.id, "approved")}
+                            onClick={() => { setApproveModal({ app }); setApproveSessionId(sessions[0]?.id ?? ""); }}
                             disabled={updatingApp === app.id}
                             className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 border border-primary/20 transition-colors font-medium"
                           >
-                            {updatingApp === app.id ? <Loader2 size={11} className="animate-spin" /> : <CheckCircle2 size={11} />}
-                            Approve
+                            <CheckCircle2 size={11} />
+                            Approve & Add
                           </button>
                         )}
                         {app.status !== "rejected" && (
@@ -850,5 +896,76 @@ export function AdminPanel() {
         )}
       </div>
     </div>
+
+    {/* ── Approve Modal ──────────────────────────────────────────────────── */}
+    {approveModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+        <div className="gradient-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-5">
+          <div>
+            <h3 className="font-display font-semibold text-foreground text-lg">Approve & Add to Session</h3>
+            <p className="text-muted-foreground text-xs mt-1">
+              Select the week to add <span className="font-medium text-foreground">{approveModal.app.display_name}</span> as a participant.
+            </p>
+          </div>
+
+          {/* Avatar + name preview */}
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+            {approveModal.app.avatar_url ? (
+              <img src={approveModal.app.avatar_url} alt={approveModal.app.display_name} className="w-10 h-10 rounded-full object-cover border border-border shrink-0" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary text-xs font-semibold shrink-0">
+                {approveModal.app.display_name.slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">{approveModal.app.display_name}</p>
+              <p className="text-xs text-muted-foreground truncate">dc: {approveModal.app.discord_handle}</p>
+              {approveModal.app.project_title && <p className="text-xs text-muted-foreground truncate">{approveModal.app.project_title}</p>}
+            </div>
+          </div>
+
+          {/* Session selector */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-2 block">Select Week *</Label>
+            {sessions.length === 0 ? (
+              <p className="text-xs text-destructive">No sessions found. Create a session first.</p>
+            ) : (
+              <select
+                value={approveSessionId}
+                onChange={(e) => setApproveSessionId(e.target.value)}
+                className="w-full h-9 rounded-md border border-input bg-input px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {sessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.week_label} ({new Date(s.session_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}){s.is_current ? " — Current" : ""}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <div className="flex gap-2 justify-end pt-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setApproveModal(null); setApproveSessionId(""); }}
+              disabled={approving}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleApproveWithSession}
+              disabled={approving || !approveSessionId || sessions.length === 0}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {approving ? <><Loader2 size={13} className="animate-spin mr-1" /> Adding…</> : "Approve & Add"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
+
