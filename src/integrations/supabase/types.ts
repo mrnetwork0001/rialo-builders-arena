@@ -121,6 +121,7 @@ export type Database = {
       session_applications: {
         Row: {
           admin_notes: string | null
+          avatar_url: string | null
           created_at: string
           discord_handle: string
           display_name: string
@@ -135,6 +136,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          avatar_url?: string | null
           created_at?: string
           discord_handle: string
           display_name: string
@@ -149,6 +151,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          avatar_url?: string | null
           created_at?: string
           discord_handle?: string
           display_name?: string

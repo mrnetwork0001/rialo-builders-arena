@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { Settings, CheckCircle2, Loader2 } from "lucide-react";
+import { Settings, CheckCircle2, Loader2, Camera, X, User } from "lucide-react";
 import { z } from "zod";
 
 const schema = z.object({
@@ -32,6 +32,10 @@ export default function ApplyPage() {
     project_description: "",
     project_link: "",
   });
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -39,6 +43,40 @@ export default function ApplyPage() {
   const set = (key: string, val: string) => {
     setForm((f) => ({ ...f, [key]: val }));
     if (errors[key]) setErrors((e) => { const n = { ...e }; delete n[key]; return n; });
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors((err) => ({ ...err, avatar: "Image must be under 5MB" }));
+      return;
+    }
+    setAvatarUploading(true);
+    setErrors((err) => { const n = { ...err }; delete n.avatar; return n; });
+
+    // Local preview
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+
+    const ext = file.name.split(".").pop();
+    const path = `applicants/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (error) {
+      setErrors((err) => ({ ...err, avatar: "Upload failed. Please try again." }));
+      setAvatarPreview("");
+    } else {
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setAvatarUrl(data.publicUrl);
+    }
+    setAvatarUploading(false);
+  };
+
+  const removeAvatar = () => {
+    setAvatarUrl("");
+    setAvatarPreview("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,6 +99,7 @@ export default function ApplyPage() {
       project_title: form.project_title || null,
       project_description: form.project_description || null,
       project_link: form.project_link || null,
+      avatar_url: avatarUrl || null,
     });
     setSubmitting(false);
     if (!error) {
@@ -123,6 +162,41 @@ export default function ApplyPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="gradient-card border border-border rounded-2xl p-8 space-y-5">
+              {/* Profile picture upload */}
+              <div className="flex flex-col items-center gap-3 pb-2">
+                <div className="relative group">
+                  <div
+                    onClick={() => !avatarUploading && fileInputRef.current?.click()}
+                    className={`w-24 h-24 rounded-full border-2 border-dashed flex items-center justify-center cursor-pointer transition-colors overflow-hidden
+                      ${avatarPreview ? "border-primary" : "border-border hover:border-primary/60 bg-muted/40"}`}
+                  >
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : avatarUploading ? (
+                      <Loader2 size={22} className="animate-spin text-muted-foreground" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                        <User size={22} />
+                        <Camera size={14} />
+                      </div>
+                    )}
+                  </div>
+                  {avatarPreview && !avatarUploading && (
+                    <button
+                      type="button"
+                      onClick={removeAvatar}
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                    >
+                      <X size={11} />
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {avatarUploading ? "Uploading…" : "Profile picture (optional, max 5MB)"}
+                </p>
+                {errors.avatar && <p className="text-xs text-destructive">{errors.avatar}</p>}
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5 block">Full Name *</Label>
