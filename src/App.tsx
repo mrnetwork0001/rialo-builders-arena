@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import SharkTank from "./pages/SharkTank";
+import SharkTankApply from "./pages/SharkTankApply";
 import BuilderProfile from "./pages/BuilderProfile";
 import ApplyPage from "./pages/ApplyPage";
 import NotFound from "./pages/NotFound";
@@ -23,6 +24,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/shark-tank" element={<SharkTank />} />
+            <Route path="/shark-tank/apply" element={<SharkTankApply />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/apply" element={<ApplyPage />} />
             <Route path="/builders/:discordHandle" element={<BuilderProfile />} />

@@ -166,6 +166,280 @@ export type Database = {
         }
         Relationships: []
       }
+      shark_tank_applications: {
+        Row: {
+          admin_notes: string | null
+          avatar_url: string | null
+          created_at: string
+          demo_link: string | null
+          discord_handle: string
+          display_name: string
+          funding_ask: string | null
+          funding_purpose: string | null
+          id: string
+          pitch_deck_link: string | null
+          project_description: string | null
+          project_name: string
+          status: string
+          twitter_handle: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          demo_link?: string | null
+          discord_handle: string
+          display_name: string
+          funding_ask?: string | null
+          funding_purpose?: string | null
+          id?: string
+          pitch_deck_link?: string | null
+          project_description?: string | null
+          project_name: string
+          status?: string
+          twitter_handle?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          demo_link?: string | null
+          discord_handle?: string
+          display_name?: string
+          funding_ask?: string | null
+          funding_purpose?: string | null
+          id?: string
+          pitch_deck_link?: string | null
+          project_description?: string | null
+          project_name?: string
+          status?: string
+          twitter_handle?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shark_tank_feedback: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          is_accepted: boolean | null
+          offer_amount: string | null
+          offer_type: string | null
+          pitch_id: string
+          shark_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          offer_amount?: string | null
+          offer_type?: string | null
+          pitch_id: string
+          shark_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          offer_amount?: string | null
+          offer_type?: string | null
+          pitch_id?: string
+          shark_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shark_tank_feedback_pitch_id_fkey"
+            columns: ["pitch_id"]
+            isOneToOne: false
+            referencedRelation: "shark_tank_pitches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shark_tank_feedback_shark_id_fkey"
+            columns: ["shark_id"]
+            isOneToOne: false
+            referencedRelation: "shark_tank_sharks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shark_tank_pitches: {
+        Row: {
+          builder_avatar_url: string | null
+          builder_discord: string | null
+          builder_name: string
+          builder_twitter: string | null
+          created_at: string
+          demo_link: string | null
+          description: string | null
+          funded_amount: string | null
+          funding_ask: string | null
+          id: string
+          is_funded: boolean | null
+          pitch_deck_link: string | null
+          project_name: string
+          session_id: string
+          sort_order: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          builder_avatar_url?: string | null
+          builder_discord?: string | null
+          builder_name: string
+          builder_twitter?: string | null
+          created_at?: string
+          demo_link?: string | null
+          description?: string | null
+          funded_amount?: string | null
+          funding_ask?: string | null
+          id?: string
+          is_funded?: boolean | null
+          pitch_deck_link?: string | null
+          project_name: string
+          session_id: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          builder_avatar_url?: string | null
+          builder_discord?: string | null
+          builder_name?: string
+          builder_twitter?: string | null
+          created_at?: string
+          demo_link?: string | null
+          description?: string | null
+          funded_amount?: string | null
+          funding_ask?: string | null
+          id?: string
+          is_funded?: boolean | null
+          pitch_deck_link?: string | null
+          project_name?: string
+          session_id?: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shark_tank_pitches_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "shark_tank_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shark_tank_sessions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_current: boolean | null
+          replay_link: string | null
+          session_date: string
+          stream_link: string | null
+          updated_at: string
+          week_label: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_current?: boolean | null
+          replay_link?: string | null
+          session_date: string
+          stream_link?: string | null
+          updated_at?: string
+          week_label: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_current?: boolean | null
+          replay_link?: string | null
+          session_date?: string
+          stream_link?: string | null
+          updated_at?: string
+          week_label?: string
+        }
+        Relationships: []
+      }
+      shark_tank_sharks: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean | null
+          sort_order: number | null
+          title: string | null
+          twitter_handle: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title?: string | null
+          twitter_handle?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title?: string | null
+          twitter_handle?: string | null
+        }
+        Relationships: []
+      }
+      shark_tank_votes: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          pitch_id: string
+          visitor_key: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          pitch_id: string
+          visitor_key: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          pitch_id?: string
+          visitor_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shark_tank_votes_pitch_id_fkey"
+            columns: ["pitch_id"]
+            isOneToOne: false
+            referencedRelation: "shark_tank_pitches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
