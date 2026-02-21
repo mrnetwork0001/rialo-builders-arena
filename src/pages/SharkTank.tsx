@@ -37,10 +37,7 @@ export default function SharkTank() {
         </div>
       </header>
 
-      {/* Blurred content with Coming Soon overlay */}
-      <div className="relative flex-1">
-        {/* Blurred page content */}
-        <div className="blur-sm pointer-events-none select-none">
+      <div className="flex-1">
           {/* Hero */}
           <section className="relative overflow-hidden py-16 md:py-24 px-4">
             <div className="absolute inset-0 pointer-events-none">
@@ -84,23 +81,6 @@ export default function SharkTank() {
               ))}
             </div>
           </main>
-        </div>
-
-        {/* Coming Soon overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-          <div className="text-center px-6 py-10 rounded-2xl border border-primary/30 bg-background/80 backdrop-blur-md shadow-xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-medium mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Coming Soon
-            </div>
-            <h2 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-3">
-              Rialo <span className="gradient-text-primary">Shark Tank</span>
-            </h2>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              This feature is under construction. Stay tuned for weekly pitch events!
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Footer */}
