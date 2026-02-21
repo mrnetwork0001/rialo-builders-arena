@@ -19,7 +19,7 @@ export function BuilderBadges({ badges, size = "sm" }: BuilderBadgesProps) {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1 relative z-10">
         {badges.map((badge) => (
           <Tooltip key={badge.id}>
             <TooltipTrigger asChild>
@@ -34,7 +34,7 @@ export function BuilderBadges({ badges, size = "sm" }: BuilderBadgesProps) {
                 )}
               </span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">
+            <TooltipContent side="top" className="text-xs z-50">
               <p className="font-semibold">{badge.label}</p>
               <p className="text-muted-foreground">{badge.description}</p>
             </TooltipContent>
