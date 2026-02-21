@@ -219,11 +219,6 @@ export default function SharkTank() {
             <Button variant="default" size="sm" className="text-sm font-medium">
               Shark Tank
             </Button>
-            <Link to="/apply">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover text-sm font-medium">
-                Apply
-              </Button>
-            </Link>
             {isAdmin && (
               <Link to="/admin">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-nav-hover gap-2 text-xs">
