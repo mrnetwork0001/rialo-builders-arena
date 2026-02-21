@@ -125,7 +125,7 @@ export type Database = {
           created_at: string
           discord_handle: string
           display_name: string
-          email: string
+          email: string | null
           id: string
           project_description: string | null
           project_link: string | null
@@ -140,7 +140,7 @@ export type Database = {
           created_at?: string
           discord_handle: string
           display_name: string
-          email: string
+          email?: string | null
           id?: string
           project_description?: string | null
           project_link?: string | null
@@ -155,7 +155,7 @@ export type Database = {
           created_at?: string
           discord_handle?: string
           display_name?: string
-          email?: string
+          email?: string | null
           id?: string
           project_description?: string | null
           project_link?: string | null
