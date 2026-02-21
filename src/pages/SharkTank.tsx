@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import rialoLogo from "@/assets/rialo-builders-arena-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { CalendarDays, Settings, Search } from "lucide-react";
@@ -5,8 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+const TYPEWRITER_TEXT = "Rialo Shark Tank";
+
 export default function SharkTank() {
   const { isAdmin } = useAuth();
+  const [typedText, setTypedText] = useState("");
+  const typewriterRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let i = 0;
+    let deleting = false;
+    const tick = () => {
+      if (!deleting) {
+        i++;
+        setTypedText(TYPEWRITER_TEXT.slice(0, i));
+        if (i === TYPEWRITER_TEXT.length) {
+          typewriterRef.current = setTimeout(() => { deleting = true; tick(); }, 1500);
+          return;
+        }
+      } else {
+        i--;
+        setTypedText(TYPEWRITER_TEXT.slice(0, i));
+        if (i === 0) {
+          typewriterRef.current = setTimeout(() => { deleting = false; tick(); }, 400);
+          return;
+        }
+      }
+      typewriterRef.current = setTimeout(tick, deleting ? 45 : 80);
+    };
+    typewriterRef.current = setTimeout(tick, 400);
+    return () => { if (typewriterRef.current) clearTimeout(typewriterRef.current); };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -49,8 +79,8 @@ export default function SharkTank() {
                 Weekly Shark Tank
               </div>
               <h1 className="font-display font-bold text-4xl md:text-6xl text-foreground leading-tight mb-4">
-                Rialo{" "}
-                <span className="gradient-text-primary">Shark Tank</span>
+                <span className="gradient-text-primary">{typedText}</span>
+                <span className="inline-block w-[3px] h-[1em] bg-primary align-middle animate-pulse ml-0.5" />
                 <br />
                 Weekly Pitches
               </h1>
