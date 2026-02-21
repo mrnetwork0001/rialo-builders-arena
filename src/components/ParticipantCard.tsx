@@ -41,7 +41,7 @@ export function ParticipantCard({ participant, sessionCount = 1 }: ParticipantCa
     .slice(0, 2);
 
   return (
-    <div className="relative gradient-card rounded-xl border border-border card-hover p-5 flex flex-col gap-4">
+    <div className="relative gradient-card rounded-xl border border-border card-hover p-5 flex flex-col gap-4 hover:z-30">
       {/* Header */}
       <div className="flex items-start gap-3">
         {participant.avatar_url ? (
