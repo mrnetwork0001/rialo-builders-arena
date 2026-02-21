@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, ChevronLeft, LogOut, Loader2, CalendarDays, Users, Edit2, Check, X, Upload, Camera, GripVertical, ClipboardList, CheckCircle2, XCircle, Clock, Star, Search } from "lucide-react";
+import { SharkTankAdmin } from "@/components/SharkTankAdmin";
 
 interface Session {
   id: string;
@@ -162,7 +163,7 @@ export function AdminPanel() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"sessions" | "participants" | "applications">("sessions");
+  const [view, setView] = useState<"sessions" | "participants" | "applications" | "shark-tank">("sessions");
 
   // New session form
   const [newSessionLabel, setNewSessionLabel] = useState("");
@@ -448,7 +449,16 @@ export function AdminPanel() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {view !== "applications" && (
+            {view !== "applications" && view !== "shark-tank" && (
+              <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setView("shark-tank")}
+                className="text-muted-foreground hover:text-primary gap-2 text-xs"
+              >
+                🦈 Shark Tank
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -463,8 +473,9 @@ export function AdminPanel() {
                   </span>
                 )}
               </Button>
+              </>
             )}
-            {view === "applications" && (
+            {(view === "applications" || view === "shark-tank") && (
               <Button variant="ghost" size="sm" onClick={() => setView("sessions")} className="text-muted-foreground hover:text-foreground text-xs gap-1">
                 <ChevronLeft size={14} /> Sessions
               </Button>
@@ -919,6 +930,11 @@ export function AdminPanel() {
               );
             })()}
           </div>
+        )}
+
+        {/* Shark Tank Admin View */}
+        {view === "shark-tank" && (
+          <SharkTankAdmin onBack={() => setView("sessions")} />
         )}
       </div>
     </div>
