@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ExternalLink, Twitter, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { ReactionBar } from "@/components/ReactionBar";
+import { BuilderBadges } from "@/components/BuilderBadges";
+import { getEarnedBadges } from "@/lib/badges";
 
 interface Participant {
   id: string;
@@ -16,9 +18,11 @@ interface Participant {
 
 interface ParticipantCardProps {
   participant: Participant;
+  sessionCount?: number;
 }
 
-export function ParticipantCard({ participant }: ParticipantCardProps) {
+export function ParticipantCard({ participant, sessionCount = 1 }: ParticipantCardProps) {
+  const badges = getEarnedBadges(sessionCount);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -73,6 +77,9 @@ export function ParticipantCard({ participant }: ParticipantCardProps) {
           </div>
         </div>
       </div>
+
+      {/* Badges */}
+      {badges.length > 0 && <BuilderBadges badges={badges} size="sm" />}
 
       {/* Project Title */}
       {participant.project_title && (

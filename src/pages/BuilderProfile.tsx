@@ -8,6 +8,8 @@ import { Settings, ExternalLink, Twitter, ArrowLeft, CalendarDays, Copy, Check, 
 import { ReactionBar } from "@/components/ReactionBar";
 import { FollowBuilder } from "@/components/FollowBuilder";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { BuilderBadges } from "@/components/BuilderBadges";
+import { getEarnedBadges } from "@/lib/badges";
 
 interface ParticipantWithSession {
   id: string;
@@ -197,6 +199,12 @@ export default function BuilderProfile() {
                   </span>
                   <FollowBuilder discordHandle={profile.discord_handle} />
                 </div>
+                {/* Badges */}
+                {entries.length > 0 && (
+                  <div className="mt-3">
+                    <BuilderBadges badges={getEarnedBadges(entries.length)} size="md" />
+                  </div>
+                )}
               </div>
             </div>
 
