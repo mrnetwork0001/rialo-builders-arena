@@ -14,7 +14,6 @@ import { z } from "zod";
 const schema = z.object({
   display_name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   discord_handle: z.string().trim().min(2, "Discord handle required").max(50),
-  email: z.string().trim().email("Invalid email address"),
   twitter_handle: z.string().trim().max(50).optional(),
   project_title: z.string().trim().max(150).optional(),
   project_description: z.string().trim().max(1000).optional(),
@@ -26,7 +25,6 @@ export default function ApplyPage() {
   const [form, setForm] = useState({
     display_name: "",
     discord_handle: "",
-    email: "",
     twitter_handle: "",
     project_title: "",
     project_description: "",
@@ -94,7 +92,6 @@ export default function ApplyPage() {
     const { error } = await (supabase as any).from("session_applications").insert({
       display_name: form.display_name,
       discord_handle: form.discord_handle,
-      email: form.email,
       twitter_handle: form.twitter_handle || null,
       project_title: form.project_title || null,
       project_description: form.project_description || null,
@@ -207,11 +204,6 @@ export default function ApplyPage() {
                   <Label className="text-xs text-muted-foreground mb-1.5 block">Discord Handle *</Label>
                   <Input value={form.discord_handle} onChange={(e) => set("discord_handle", e.target.value)} placeholder="johndoe" className="bg-input border-border" />
                   {errors.discord_handle && <p className="text-xs text-destructive mt-1">{errors.discord_handle}</p>}
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1.5 block">Email *</Label>
-                  <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" className="bg-input border-border" />
-                  {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5 block">Twitter / X Handle</Label>

@@ -1,0 +1,1 @@
+ALTER TABLE public.session_applications ALTER COLUMN email DROP NOT NULL;
