@@ -43,19 +43,19 @@ export function ParticipantCard({ participant, sessionCount = 1 }: ParticipantCa
   return (
     <div className="relative gradient-card rounded-xl border border-border card-hover p-5 flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         {participant.avatar_url ? (
           <img
             src={participant.avatar_url}
             alt={participant.display_name}
-            className="w-12 h-12 rounded-full object-cover border-2 border-primary/30"
+            className="w-12 h-12 rounded-full object-cover border-2 border-primary/30 shrink-0"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-primary font-display font-semibold text-sm">
+          <div className="w-12 h-12 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-primary font-display font-semibold text-sm shrink-0">
             {initials}
           </div>
         )}
-        <div>
+        <div className="flex-1 min-w-0">
           <Link
             to={`/builders/${encodeURIComponent(participant.discord_handle)}`}
             className="font-display font-semibold text-foreground text-base leading-tight hover:text-primary transition-colors"
@@ -76,10 +76,9 @@ export function ParticipantCard({ participant, sessionCount = 1 }: ParticipantCa
             </button>
           </div>
         </div>
+        {/* Badges - top right */}
+        {badges.length > 0 && <BuilderBadges badges={badges} size="sm" />}
       </div>
-
-      {/* Badges */}
-      {badges.length > 0 && <BuilderBadges badges={badges} size="sm" />}
 
       {/* Project Title */}
       {participant.project_title && (
