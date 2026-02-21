@@ -43,6 +43,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [participantsLoading, setParticipantsLoading] = useState(false);
+  const [sessionCounts, setSessionCounts] = useState<Record<string, number>>({});
   const [typedText, setTypedText] = useState("");
   const typewriterRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -115,6 +116,33 @@ export default function Index() {
       .order("sort_order")
       .order("created_at");
     setParticipants(data || []);
+
+    // Fetch session counts for badges
+    if (data && data.length > 0) {
+      const handles = [...new Set(data.map((p) => p.discord_handle))];
+      const { data: allEntries } = await supabase
+        .from("participants")
+        .select("discord_handle, session_id")
+        .in("discord_handle", handles);
+      const counts: Record<string, number> = {};
+      if (allEntries) {
+        for (const entry of allEntries) {
+          // Count unique sessions per handle
+          if (!counts[entry.discord_handle]) counts[entry.discord_handle] = 0;
+        }
+        // Group by handle -> unique session_ids
+        const handleSessions: Record<string, Set<string>> = {};
+        for (const entry of allEntries) {
+          if (!handleSessions[entry.discord_handle]) handleSessions[entry.discord_handle] = new Set();
+          handleSessions[entry.discord_handle].add(entry.session_id);
+        }
+        for (const [handle, sessions] of Object.entries(handleSessions)) {
+          counts[handle] = sessions.size;
+        }
+      }
+      setSessionCounts(counts);
+    }
+
     setParticipantsLoading(false);
   };
 
@@ -330,7 +358,7 @@ export default function Index() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
                 {pagedParticipants.map((participant) => (
-                  <ParticipantCard key={participant.id} participant={participant} />
+                  <ParticipantCard key={participant.id} participant={participant} sessionCount={sessionCounts[participant.discord_handle] || 1} />
                 ))}
               </div>
             )}
